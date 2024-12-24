@@ -60,7 +60,6 @@ __global__ void cropImageKernel(const uchar* inputImage, uchar* outputImage, int
 
 Detector::Detector(int gpu) 
 	:gpu_{gpu} {
-
 }
 
 Detector::~Detector() {
@@ -155,26 +154,29 @@ ErrorCode Detector::extract_rois(const unsigned char* d_image, std::vector<unsig
 	return ErrorCode::SUCCESS;
 }
 
-ErrorCode Detector::detect(image_t img, std::vector<bbox_t>& result) {
+ErrorCode Detector::detect(image_t img,  float score, std::vector<bbox_t>& result) {
 	yolo::BoxArray objs = yolo_->forward(yolo::Image(img.data, img.w, img.h));
 	for (auto& obj : objs) {
 		bbox_t box;
+		if (obj.confidence < score)
+			continue;
+		box.prob = obj.confidence;
 		box.x = obj.left;
 		box.y = obj.top;
 		box.w = obj.right - obj.left;
 		box.h = obj.bottom - obj.top;
-		box.prob = obj.confidence;
 		box.obj_id = obj.class_label;
 		result.push_back(box);
 	}
 	return ErrorCode::SUCCESS;
 }
 
-ErrorCode Detector::detectBatch(image_t img, int batch_size, int width, int height, std::vector<std::vector<bbox_t>>& result) {
+ErrorCode Detector::detectBatch(image_t img, int batch_size, int width, int height,  float score, std::vector<std::vector<bbox_t>>& result) {
 	return ErrorCode::SUCCESS;
 }	
 
 ErrorCode Detector::dispose() {
+	yolo_.reset();
 	return ErrorCode::SUCCESS;
 }
 
