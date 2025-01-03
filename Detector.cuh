@@ -34,7 +34,7 @@ public:
 	Detector(const Detector& rhs) = delete;
 	Detector& operator=(const Detector& rhs) = delete;
 
-	ErrorCode split_image_with_overlap(int imgWidth, int imgHeight, int startX, int startY, int roiWidth, int roiHeight, int stepX, int stepY, std::vector<roi_t>& rois);
+	ErrorCode split_image_with_overlap(int startX, int startY,int endX,int endY, int roiWidth, int roiHeight, int stepX, int stepY, std::vector<roi_t>& rois);
 
 	ErrorCode init(const char* type, const char* weights_file, float confidence_threshold = 0.2, float nms_threshold = 0.45);
 	ErrorCode init_extract_rois(int img_width, int img_height, int img_channels, int sub_img_width, int sub_img_height, int roi_count);

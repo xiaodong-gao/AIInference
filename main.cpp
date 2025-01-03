@@ -155,9 +155,12 @@ int main()
         int strideX = subWidth - overlap_x; // 横向步长
         int strideY = subHeight - overlap_y; // 纵向步长
 
+        int roi_col_count = std::floor(img_width / strideX ) + 1;
+        int roi_row_count = std::floor(img_height / strideY) + 1;
+
         std::vector<roi_t> rois;
         //step1 cpu 设置参数 分离roi信息
-        error_code = detector_->split_image_with_overlap(img_width, img_height, 0, 0, subWidth, subHeight, strideX, strideY, rois);
+        error_code = detector_->split_image_with_overlap(0, 0, img_width, img_height, subWidth, subHeight, strideX, strideY, rois);
         if (error_code != ErrorCode::SUCCESS) {
 
         }
@@ -177,6 +180,7 @@ int main()
 
         // step4 推理检测结果
         std::vector<bbox_t> result;
+        std::vector<cv::Mat> vec_result_image_;
         float score = 0.45;
         for (int i = 0; i < rois.size(); ++i) {
             roi_t roi = rois[i];
@@ -195,8 +199,20 @@ int main()
 #if SAVE_RESULT
             std::string result_image_name = "./result_images/result_" + file_name + std::to_string(i) + ".bmp";
             draw_boxes(croppedImage, result, obj_names, result_image_name);
+            vec_result_image_.push_back(croppedImage);         
 #endif
         }
+
+        //拼接结果图像 
+        cv::Mat result_img(subHeight * roi_row_count, subWidth * roi_col_count, vec_result_image_[0].type());
+        for (int r = 0; r < roi_row_count; ++r) {
+            for (int c = 0; c < roi_col_count; ++c) {
+                // 将每个图像放置到正确的位置
+                vec_result_image_[r * roi_col_count + c].copyTo(result_img(cv::Rect(c * subWidth, r * subHeight, subWidth, subHeight)));
+            }
+        }
+        cv::imwrite("1111.bmp", result_img);
+
         // 获取当前时间作为结束时间
         auto end = std::chrono::high_resolution_clock::now();
         // 计算程序运行时间，单位为毫秒

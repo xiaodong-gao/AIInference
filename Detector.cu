@@ -105,21 +105,21 @@ ErrorCode Detector::init_extract_rois(int img_width, int img_height, int img_cha
 	return ErrorCode::SUCCESS;
 }
 
-ErrorCode Detector::split_image_with_overlap(int imgWidth, int imgHeight, int startX, int startY, int roiWidth, int roiHeight, int stepX, int stepY, std::vector<roi_t>& rois) {
+ErrorCode Detector::split_image_with_overlap( int startX, int startY, int endX, int endY, int roiWidth, int roiHeight, int stepX, int stepY, std::vector<roi_t>& rois) {
 	// 计算 ROI 的数量
-	for (int y = startY; y <= imgHeight; y += stepY) {
-		for (int x = startX; x <= imgWidth; x += stepX) {
+	for (int y = startY; y <= endX; y += stepY) {
+		for (int x = startX; x <= endY; x += stepX) {
 			//rois.push_back(roi_t{x,y,roiWidth ,roiHeight });
 			int roi_x = x;
 			int roi_y = y;
 			int roi_w = roiWidth;
 			int roi_h = roiHeight;
 			// 确保最后的 ROI 不会超出图像边界
-			if (roi_x + roi_w > imgWidth) {
+			if (roi_x + roi_w > endX) {
 				//roi_w = imgWidth - roi_x;
 				roi_w = roiWidth;
 			}
-			if (roi_y + roi_h > imgHeight) {
+			if (roi_y + roi_h > endY) {
 				//roi_h = imgHeight - roi_y;
 				roi_h = roiHeight;
 			}
